@@ -1,3 +1,5 @@
+![ss1](https://github.com/user-attachments/assets/192f18c3-9524-4d96-9cba-cf58a406521d)
+
 # 🐼 Dominguers
 
 Managing and distributing crypto funds among multiple recipients has always been a cumbersome process, requiring multiple gas-heavy transactions and complex wallet interactions.  Dominguers provides a seamless, gas-free solution for batch distributing crypto funds.
@@ -34,3 +36,6 @@ Coinbase onchainkit:
 
 Smart Wallet Integration: 
 👛 Leverages smart contract wallets to enable batch transactions and complex operations in a single transaction, significantly reducing costs and improving efficiency.
+
+![ss2](https://github.com/user-attachments/assets/28d7e8a0-195a-4c1a-a978-32fccf5687f2)
+![ss3](https://github.com/user-attachments/assets/db2a13fe-33d1-4173-88fd-a88bf6ae2a41)
