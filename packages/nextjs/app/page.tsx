@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { parseEther } from "viem";
 import { useWriteContracts } from "wagmi/experimental";
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import { AddressInput, EtherInput } from "~~/components/scaffold-eth";
@@ -27,6 +26,7 @@ const TokenSplitterPage = () => {
   };
 
   const { data: Splitter } = useDeployedContractInfo("Splitter");
+  const { writeContractsAsync } = useWriteContracts();
   const { writeContractAsync: writeScaffoldAsycn } = useScaffoldWriteContract("Splitter");
 
   const handleAddressChange = (index: number, value: string): void => {
@@ -41,13 +41,22 @@ const TokenSplitterPage = () => {
       const validRecipients = recipients.filter(r => r.address);
 
       // Create an array of amounts, repeating the amount for each recipient
-      const amounts = Array(validRecipients.length).fill(parseEther(amount));
-      console.log("Splitting ETH to:", validRecipients, amounts);
-
-      await writeScaffoldAsycn({
-        functionName: "multisendEther",
-        args: [validRecipients.map(r => r.address), amounts],
-        value: parseEther((Number(amount) * validRecipients.length).toString()),
+      const amounts = Array(validRecipients.length).fill(amount);
+      const paymasterURL = process.env.NEXT_PUBLIC_PAYMASTER_URL;
+      await writeContractsAsync({
+        contracts: [
+          {
+            address: Splitter.address,
+            abi: Splitter.abi,
+            functionName: "multisendEther",
+            args: [validRecipients.map(r => r.address), amounts],
+          },
+        ],
+        capabilities: {
+          paymasterService: {
+            url: paymasterURL,
+          },
+        },
       });
     } catch (error) {
       console.error("Error:", error);
