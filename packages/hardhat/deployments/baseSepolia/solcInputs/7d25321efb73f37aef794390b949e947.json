@@ -1,0 +1,36 @@
+{
+  "language": "Solidity",
+  "sources": {
+    "contracts/Splitter.sol": {
+      "content": "// SPDX-License-Identifier: MIT\npragma solidity >=0.8.0 <0.9.0;\n\nabstract contract ERC20Basic {\n\tfunction totalSupply() public view virtual returns (uint256);\n\n\tfunction balanceOf(address who) public view virtual returns (uint256);\n\n\tfunction transfer(address to, uint256 value) public virtual returns (bool);\n\n\tevent Transfer(address indexed from, address indexed to, uint256 value);\n}\n\nabstract contract ERC20 is ERC20Basic {\n\tfunction allowance(\n\t\taddress owner,\n\t\taddress spender\n\t) public view virtual returns (uint256);\n\n\tfunction transferFrom(\n\t\taddress from,\n\t\taddress to,\n\t\tuint256 value\n\t) public virtual returns (bool);\n\n\tfunction approve(\n\t\taddress spender,\n\t\tuint256 value\n\t) public virtual returns (bool);\n\n\tevent Approval(\n\t\taddress indexed owner,\n\t\taddress indexed spender,\n\t\tuint256 value\n\t);\n}\n\ncontract Splitter {\n\tmapping(address => uint256) public txCount;\n\taddress public owner;\n\tuint16 public arrayLimit = 150;\n\n\tevent Multisended(uint256 total, address tokenAddress);\n\n\tmodifier onlyOwner() {\n\t\trequire(msg.sender == owner, \"Only owner can call this function.\");\n\t\t_;\n\t}\n\n\tconstructor(address _owner) {\n\t\towner = _owner;\n\t}\n\n\treceive() external payable {}\n\n\tfunction changeTreshold(uint16 _newLimit) public onlyOwner {\n\t\tarrayLimit = _newLimit;\n\t}\n\n\tfunction multisendToken(\n\t\taddress token,\n\t\taddress[] memory _contributors,\n\t\tuint256[] memory _balances\n\t) public {\n\t\tuint256 total = 0;\n\t\trequire(\n\t\t\t_contributors.length <= arrayLimit,\n\t\t\t\"Too many contributors in a single transaction.\"\n\t\t);\n\t\tERC20 erc20token = ERC20(token);\n\t\tuint8 i = 0;\n\t\trequire(\n\t\t\terc20token.allowance(msg.sender, address(this)) > 0,\n\t\t\t\"Insufficient token allowance.\"\n\t\t);\n\t\tfor (i; i < _contributors.length; i++) {\n\t\t\terc20token.transferFrom(msg.sender, _contributors[i], _balances[i]);\n\t\t\ttotal += _balances[i];\n\t\t}\n\t\ttxCount[msg.sender]++;\n\t\temit Multisended(total, token);\n\t}\n\n\tfunction multisendEther(\n\t\taddress[] memory _contributors,\n\t\tuint256[] memory _balances\n\t) public payable {\n\t\tuint256 total = 0;\n\t\trequire(\n\t\t\t_contributors.length <= arrayLimit,\n\t\t\t\"Too many contributors in a single transaction.\"\n\t\t);\n\t\tuint8 i = 0;\n\t\tfor (i; i < _contributors.length; i++) {\n\t\t\t(bool success, ) = _contributors[i].call{ value: _balances[i] }(\"\");\n\t\t\trequire(success, \"Ether transfer failed.\");\n\t\t\ttotal += _balances[i];\n\t\t}\n\t\ttxCount[msg.sender]++;\n\t\temit Multisended(total, address(0));\n\t}\n}\n"
+    }
+  },
+  "settings": {
+    "optimizer": {
+      "enabled": true,
+      "runs": 200
+    },
+    "evmVersion": "paris",
+    "outputSelection": {
+      "*": {
+        "*": [
+          "abi",
+          "evm.bytecode",
+          "evm.deployedBytecode",
+          "evm.methodIdentifiers",
+          "metadata",
+          "devdoc",
+          "userdoc",
+          "storageLayout",
+          "evm.gasEstimates"
+        ],
+        "": [
+          "ast"
+        ]
+      }
+    },
+    "metadata": {
+      "useLiteralContent": true
+    }
+  }
+}

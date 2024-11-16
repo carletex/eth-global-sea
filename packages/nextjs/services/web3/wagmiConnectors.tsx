@@ -13,6 +13,7 @@ import scaffoldConfig from "~~/scaffold.config";
 
 const { onlyLocalBurnerWallet, targetNetworks } = scaffoldConfig;
 
+coinbaseWallet.preference = "smartWalletOnly";
 const wallets = [
   metaMaskWallet,
   walletConnectWallet,
